@@ -1,7 +1,7 @@
 name: SpeedCharge-Windows-Build
 
 on:
-  workflow_dispatch: # Allows manual trigger from the Actions tab
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -18,7 +18,7 @@ jobs:
       - name: 🛠️ Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.4' # Required for Color.withValues()
+          flutter-version: '3.27.4'
           channel: 'stable'
           cache: true
 
@@ -28,8 +28,17 @@ jobs:
       - name: 📦 Install pub dependencies
         run: flutter pub get
 
-      # FIX: This command fixes "Could not find package build_runner"
-      # (Ensure build_runner is in dev_dependencies in pubspec.yaml)
+      - name: 🪟 Create Windows project (if missing)
+        shell: pwsh
+        run: |
+          if (-Not (Test-Path "windows")) {
+            Write-Host "⚠️  No windows/ folder found — creating it now..."
+            flutter create --platforms=windows .
+            Write-Host "✅ Windows project created."
+          } else {
+            Write-Host "✅ windows/ folder already exists, skipping."
+          }
+
       - name: ⚙️ Run build_runner (Code Gen)
         run: dart run build_runner build --delete-conflicting-outputs
 
@@ -51,7 +60,6 @@ jobs:
 
           Write-Host "✅ Found Release folder at: $appPath"
 
-          # Create output zip
           Compress-Archive `
             -Path "$appPath\*" `
             -DestinationPath "SpeedCharge-Windows.zip" `
