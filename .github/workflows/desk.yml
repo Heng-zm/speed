@@ -1,0 +1,84 @@
+name: SpeedCharge-Windows-Build
+
+on:
+  workflow_dispatch: # Allows manual trigger from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    name: 🎉 Build SpeedCharge (Windows EXE)
+    runs-on: windows-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🛠️ Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.4' # Required for Color.withValues()
+          channel: 'stable'
+          cache: true
+
+      - name: 🖥️ Enable Windows desktop support
+        run: flutter config --enable-windows-desktop
+
+      - name: 📦 Install pub dependencies
+        run: flutter pub get
+
+      # FIX: This command fixes "Could not find package build_runner"
+      # (Ensure build_runner is in dev_dependencies in pubspec.yaml)
+      - name: ⚙️ Run build_runner (Code Gen)
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: 🏗️ Build Windows app (Release)
+        run: |
+          flutter build windows --release `
+            --build-number=${{ github.run_number }} `
+            --build-name=1.1.${{ github.run_number }}
+
+      - name: 📦 Package as ZIP
+        shell: pwsh
+        run: |
+          $appPath = "build\windows\x64\runner\Release"
+
+          if (-Not (Test-Path $appPath)) {
+            Write-Error "❌ Release folder not found at: $appPath"
+            exit 1
+          }
+
+          Write-Host "✅ Found Release folder at: $appPath"
+
+          # Create output zip
+          Compress-Archive `
+            -Path "$appPath\*" `
+            -DestinationPath "SpeedCharge-Windows.zip" `
+            -Force
+
+          Write-Host "✅ SpeedCharge-Windows.zip created."
+
+      - name: 🚀 Upload to GitHub Releases
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: SpeedCharge-Windows.zip
+          asset_name: SpeedCharge-Windows-v1.1.${{ github.run_number }}.zip
+          tag: v1.1.${{ github.run_number }}
+          overwrite: true
+          body: |
+            ## ⚡ SpeedCharge — Build ${{ github.run_number }}
+
+            **Platform:** Windows (x64)
+            **Version:** 1.1.${{ github.run_number }}
+            **Flutter:** 3.27.4
+
+            ### ℹ️ Installation
+            1. Download and extract the ZIP file
+            2. Run **SpeedCharge.exe** inside the extracted folder
+            3. No installation required — fully portable
+
+            ### ⚠️ Requirements
+            - Windows 10 version 1903 or later (64-bit)
+            - Visual C++ Redistributable 2019+ (usually pre-installed)
