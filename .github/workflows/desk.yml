@@ -28,6 +28,18 @@ jobs:
       - name: 📦 Install pub dependencies
         run: flutter pub get
 
+      - name: 📁 Ensure assets folder exists
+        shell: pwsh
+        run: |
+          if (-Not (Test-Path "assets")) {
+            New-Item -ItemType Directory -Path "assets" | Out-Null
+            # Flutter requires at least one file in the folder to resolve the entry
+            New-Item -ItemType File -Path "assets\.keep" | Out-Null
+            Write-Host "✅ Created empty assets/ folder."
+          } else {
+            Write-Host "✅ assets/ folder already exists."
+          }
+
       - name: 🪟 Create Windows project (if missing)
         shell: pwsh
         run: |
