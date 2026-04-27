@@ -12,7 +12,7 @@ dependencies:
   battery_plus: ^6.1.0
   percent_indicator: ^4.2.3
   fl_chart: ^0.68.0
-  shared_preferences: ^2.2.3
+  shared_preferences: ^2.3.2
   intl: ^0.19.0
   google_fonts: ^6.2.1
   cupertino_icons: ^1.0.6
@@ -21,11 +21,8 @@ dependencies:
   # Added for the build_runner/Hive workflow:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-<<<<<<< HEAD
   device_info_plus: ^11.1.0
   package_info_plus: ^8.1.0
-=======
->>>>>>> ebbbfe0f05110b930fe92ee05e49fc9d75e5c093
 
 dev_dependencies:
   flutter_test:
