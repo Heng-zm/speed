@@ -21,8 +21,11 @@ dependencies:
   # Added for the build_runner/Hive workflow:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+<<<<<<< HEAD
   device_info_plus: ^11.1.0
   package_info_plus: ^8.1.0
+=======
+>>>>>>> ebbbfe0f05110b930fe92ee05e49fc9d75e5c093
 
 dev_dependencies:
   flutter_test:

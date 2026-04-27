@@ -16,6 +16,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+<<<<<<< HEAD
   // Real Hardware State
   String _deviceModel = "Loading Device...";
   String _batteryLevel = "--";
@@ -23,6 +24,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _buildNumber = "1";
 
   // Persistent Settings State
+=======
+  // PERFORMANCE: ValueNotifiers ensure only the specific switch/text rebuilds
+>>>>>>> ebbbfe0f05110b930fe92ee05e49fc9d75e5c093
   final _smartCharge = ValueNotifier<bool>(true);
   final _notifications = ValueNotifier<bool>(true);
   final _overchargeAlert = ValueNotifier<bool>(true);
@@ -127,19 +131,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 12),
           const _HeaderSection(),
           const SizedBox(height: 24),
+<<<<<<< HEAD
 
           // REAL Device Card
           _DeviceCard(model: _deviceModel, status: _batteryLevel),
 
           const SizedBox(height: 28),
 
+=======
+          const _DeviceCard(),
+          const SizedBox(height: 24),
+>>>>>>> ebbbfe0f05110b930fe92ee05e49fc9d75e5c093
           const _SectionHeader('Optimization'),
           _SettingGroup(children: [
             _ToggleRow(
               label: 'Smart Charge Limit',
+<<<<<<< HEAD
               subtitle: 'Extend battery life by stopping at 80%',
               notifier: _smartCharge,
               onToggled: (v) => _saveSetting('smartCharge', v),
+=======
+              subtitle: 'Prevent wear by stopping at 80%',
+              notifier: _smartCharge,
+>>>>>>> ebbbfe0f05110b930fe92ee05e49fc9d75e5c093
             ),
           ]),
 
@@ -168,8 +182,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           const _SectionHeader('System Info'),
           _SettingGroup(children: [
+<<<<<<< HEAD
             _InfoTile(label: 'Version', value: _appVersion),
             _InfoTile(label: 'Build', value: _buildNumber),
+=======
+            const _InfoTile(label: 'Version', value: '1.1.0'),
+            const _InfoTile(label: 'Build', value: '2025.01.RC1'),
+>>>>>>> ebbbfe0f05110b930fe92ee05e49fc9d75e5c093
             const _InfoTile(
                 label: 'Data Source', value: 'System API', isLast: true),
           ]),
@@ -181,7 +200,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
+<<<<<<< HEAD
 // --- Local UI Components ---
+=======
+// --- Components ---
+>>>>>>> ebbbfe0f05110b930fe92ee05e49fc9d75e5c093
 
 class _SettingGroup extends StatelessWidget {
   final List<Widget> children;
@@ -220,7 +243,11 @@ class _HeaderSection extends StatelessWidget {
         ),
         const Text(
           'Manage SpeedCharge performance',
+<<<<<<< HEAD
           style: TextStyle(fontSize: 13, color: AppTheme.textMuted),
+=======
+          style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
+>>>>>>> ebbbfe0f05110b930fe92ee05e49fc9d75e5c093
         ),
       ],
     );
@@ -228,11 +255,15 @@ class _HeaderSection extends StatelessWidget {
 }
 
 class _DeviceCard extends StatelessWidget {
+<<<<<<< HEAD
   final String model;
   final String status;
 
   const _DeviceCard({required this.model, required this.status});
 
+=======
+  const _DeviceCard();
+>>>>>>> ebbbfe0f05110b930fe92ee05e49fc9d75e5c093
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -249,10 +280,17 @@ class _DeviceCard extends StatelessWidget {
             height: 52,
             decoration: BoxDecoration(
               color: const Color(0xFF0a1a12),
+<<<<<<< HEAD
               borderRadius: BorderRadius.circular(14),
             ),
             child: const Icon(Icons.bolt_rounded,
                 color: AppTheme.accentLight, size: 28),
+=======
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.bolt_rounded,
+                color: AppTheme.accentLight, size: 26),
+>>>>>>> ebbbfe0f05110b930fe92ee05e49fc9d75e5c093
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -269,6 +307,7 @@ class _DeviceCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
+<<<<<<< HEAD
                 Text(
                   status,
                   style:
@@ -276,6 +315,14 @@ class _DeviceCard extends StatelessWidget {
                 ),
               ],
             ),
+=======
+              ),
+              const Text(
+                'Health: 98% · 3847 mAh',
+                style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
+              ),
+            ],
+>>>>>>> ebbbfe0f05110b930fe92ee05e49fc9d75e5c093
           ),
         ],
       ),
@@ -290,6 +337,7 @@ class _ToggleRow extends StatelessWidget {
   final Function(bool) onToggled;
   final bool isLast;
 
+<<<<<<< HEAD
   const _ToggleRow({
     required this.label,
     required this.subtitle,
@@ -297,6 +345,13 @@ class _ToggleRow extends StatelessWidget {
     required this.onToggled,
     this.isLast = false,
   });
+=======
+  const _ToggleRow(
+      {required this.label,
+      required this.subtitle,
+      required this.notifier,
+      this.isLast = false});
+>>>>>>> ebbbfe0f05110b930fe92ee05e49fc9d75e5c093
 
   @override
   Widget build(BuildContext context) {
@@ -318,6 +373,7 @@ class _ToggleRow extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+<<<<<<< HEAD
                       Text(
                         label,
                         style: const TextStyle(
@@ -331,6 +387,14 @@ class _ToggleRow extends StatelessWidget {
                         style: const TextStyle(
                             fontSize: 12, color: AppTheme.textMuted),
                       ),
+=======
+                      Text(label,
+                          style: const TextStyle(
+                              fontSize: 14, color: AppTheme.textPrimary)),
+                      Text(subtitle,
+                          style: const TextStyle(
+                              fontSize: 11, color: AppTheme.textMuted)),
+>>>>>>> ebbbfe0f05110b930fe92ee05e49fc9d75e5c093
                     ],
                   ),
                 ),
@@ -375,6 +439,7 @@ class _InfoTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+<<<<<<< HEAD
         GestureDetector(
           onLongPress: () {
             Clipboard.setData(ClipboardData(text: value));
@@ -398,6 +463,20 @@ class _InfoTile extends StatelessWidget {
                         fontSize: 15, color: AppTheme.textMuted)),
               ],
             ),
+=======
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(label,
+                  style: const TextStyle(
+                      fontSize: 14, color: AppTheme.textSecondary)),
+              Text(value,
+                  style:
+                      const TextStyle(fontSize: 14, color: AppTheme.textMuted)),
+            ],
+>>>>>>> ebbbfe0f05110b930fe92ee05e49fc9d75e5c093
           ),
         ),
         if (!isLast)
@@ -414,6 +493,7 @@ class _InfoTile extends StatelessWidget {
 class _SectionHeader extends StatelessWidget {
   final String text;
   const _SectionHeader(this.text);
+<<<<<<< HEAD
 
   @override
   Widget build(BuildContext context) {
@@ -427,6 +507,19 @@ class _SectionHeader extends StatelessWidget {
           letterSpacing: 1.2,
           fontWeight: FontWeight.w700,
         ),
+=======
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8, left: 4),
+      child: Text(
+        text.toUpperCase(),
+        style: const TextStyle(
+            fontSize: 11,
+            color: AppTheme.textMuted,
+            letterSpacing: 1.0,
+            fontWeight: FontWeight.w600),
+>>>>>>> ebbbfe0f05110b930fe92ee05e49fc9d75e5c093
       ),
     );
   }
