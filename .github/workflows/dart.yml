@@ -1,14 +1,14 @@
-name: iOS-ipa-build
+name: SpeedCharge-IPA-Build
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Allows manual trigger from the Actions tab
 
 permissions:
   contents: write
 
 jobs:
   build-ios:
-    name: 🎉 iOS Release Build
+    name: 🎉 Build SpeedCharge (Unsigned IPA)
     runs-on: macos-latest
 
     steps:
@@ -18,17 +18,19 @@ jobs:
       - name: 🛠️ Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.4'
+          flutter-version: '3.27.4' # Required for Color.withValues()
           channel: 'stable'
           cache: true
 
       - name: 📦 Install pub dependencies
         run: flutter pub get
 
-      # FIXED: Changed to 'dart run' for Flutter 3.27 compatibility
-      - name: ⚙️ Run build_runner
+      # FIX: This command fixes "Could not find package build_runner" 
+      # (Ensure build_runner is in dev_dependencies in pubspec.yaml)
+      - name: ⚙️ Run build_runner (Hive/Code Gen)
         run: dart run build_runner build --delete-conflicting-outputs
 
+      # Generates Generated.xcconfig without attempting to compile
       - name: 🔧 Generate Xcode config
         run: |
           flutter build ios --release --config-only --no-codesign \
@@ -36,18 +38,33 @@ jobs:
             --build-name=1.1.${{ github.run_number }}
 
       - name: 🦕 Pod install
-        run: cd ios && pod install --repo-update
+        run: |
+          cd ios
+          pod install --repo-update
 
-      - name: 🔓 Patch Xcode signing
+      # This step patches the project to allow building without an Apple Developer Account
+      - name: 🔓 Patch Xcode signing (Sideloading Fix)
         run: |
           PBX="ios/Runner.xcodeproj/project.pbxproj"
-          sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' "$PBX"
-          sed -i '' 's/CODE_SIGNING_REQUIRED = YES;/CODE_SIGNING_REQUIRED = NO;/g' "$PBX"
           
+          # Remove Team IDs and Provisioning
+          sed -i '' 's/DEVELOPMENT_TEAM = [^;]*;//g'                               "$PBX"
+          sed -i '' 's/PROVISIONING_PROFILE_SPECIFIER = [^;]*;//g'                 "$PBX"
+          
+          # Force Manual Signing & Disable Requirements
+          sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g'   "$PBX"
+          sed -i '' 's/CODE_SIGNING_REQUIRED = YES;/CODE_SIGNING_REQUIRED = NO;/g' "$PBX"
+          sed -i '' 's/CODE_SIGN_IDENTITY = [^;]*;//g'                             "$PBX"
+
+          # Append overrides to xcconfigs
           echo "CODE_SIGNING_ALLOWED=NO"  >> ios/Flutter/Generated.xcconfig
           echo "CODE_SIGNING_REQUIRED=NO" >> ios/Flutter/Generated.xcconfig
+          echo "CODE_SIGNING_ALLOWED=NO"  >> ios/Flutter/Release.xcconfig
+          echo "CODE_SIGNING_REQUIRED=NO" >> ios/Flutter/Release.xcconfig
 
-      - name: 🏗️ Build iOS app
+          echo "✅ Xcode project patched for unsigned build."
+
+      - name: 🏗️ Build iOS app (xcodebuild)
         run: |
           xcodebuild \
             -workspace ios/Runner.xcworkspace \
@@ -57,19 +74,44 @@ jobs:
             -derivedDataPath build/DerivedData \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM="" \
             build
 
-      - name: 📦 Package IPA
+      - name: 📦 Package IPA for Sideloading
         run: |
-          mkdir -p Payload
-          cp -r build/DerivedData/Build/Products/Release-iphoneos/Runner.app Payload/
-          zip -qq -r -9 BT-SecureChat.ipa Payload
+          # Find the compiled .app folder
+          APP_PATH=$(find build/DerivedData -name "Runner.app" -path "*/Release-iphoneos/*" | head -1)
           
-      - name: 🚀 Upload Release
+          if [ -z "$APP_PATH" ]; then
+            echo "❌ Runner.app not found!"
+            exit 1
+          fi
+
+          echo "✅ Found App at: $APP_PATH"
+          mkdir -p Payload
+          cp -r "$APP_PATH" Payload/
+          zip -qq -r -9 SpeedCharge.ipa Payload
+          echo "✅ SpeedCharge.ipa created."
+
+      - name: 🚀 Upload to GitHub Releases
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: BT-SecureChat.ipa
-          asset_name: BT-SecureChat-v1.1.${{ github.run_number }}.ipa
+          file: SpeedCharge.ipa
+          asset_name: SpeedCharge-v1.1.${{ github.run_number }}.ipa
           tag: v1.1.${{ github.run_number }}
           overwrite: true
+          body: |
+            ## ⚡ SpeedCharge — Build ${{ github.run_number }}
+            
+            **Platform:** iOS (Unsigned IPA)
+            **Version:** 1.1.${{ github.run_number }}
+            **Flutter:** 3.27.4
+            
+            ### ℹ️ Installation
+            This is an **unsigned IPA**. To install on your iPhone, use:
+            * **AltStore**
+            * **Sideloadly**
+            * **TrollStore** (if supported)
+            * **MapleSign**
