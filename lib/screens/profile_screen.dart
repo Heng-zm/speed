@@ -12,14 +12,15 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final _aodEnabled = ValueNotifier<bool>(true);
+  // PERFORMANCE: ValueNotifiers ensure only the specific switch/text rebuilds
+  final _smartCharge = ValueNotifier<bool>(true);
   final _notifications = ValueNotifier<bool>(true);
   final _overchargeAlert = ValueNotifier<bool>(true);
   final _heatAlert = ValueNotifier<bool>(true);
 
   @override
   void dispose() {
-    _aodEnabled.dispose();
+    _smartCharge.dispose();
     _notifications.dispose();
     _overchargeAlert.dispose();
     _heatAlert.dispose();
@@ -28,7 +29,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Reverted to returning SingleChildScrollView to match your original layout
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -40,12 +40,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 24),
           const _DeviceCard(),
           const SizedBox(height: 24),
-          const _SectionHeader('Display'),
+          const _SectionHeader('Optimization'),
           _SettingGroup(children: [
             _ToggleRow(
-              label: 'Always On Display',
-              subtitle: 'Show charge info on lock screen',
-              notifier: _aodEnabled,
+              label: 'Smart Charge Limit',
+              subtitle: 'Prevent wear by stopping at 80%',
+              notifier: _smartCharge,
             ),
           ]),
           const _SectionHeader('Alerts'),
@@ -69,8 +69,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ]),
           const _SectionHeader('About'),
           _SettingGroup(children: [
-            const _InfoTile(label: 'Version', value: '1.0.0'),
-            const _InfoTile(label: 'Build', value: '2024.1'),
+            const _InfoTile(label: 'Version', value: '1.1.0'),
+            const _InfoTile(label: 'Build', value: '2025.01.RC1'),
             const _InfoTile(
                 label: 'Data Source', value: 'battery_plus', isLast: true),
           ]),
@@ -81,8 +81,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
-/// PERFORMANCE FIX: Groups items in a single container to reduce
-/// the number of background paints and rounded corner clips.
+// --- Components ---
+
 class _SettingGroup extends StatelessWidget {
   final List<Widget> children;
   const _SettingGroup({required this.children});
@@ -92,7 +92,7 @@ class _SettingGroup extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: AppTheme.bgCard, // Reverted to verified existing theme variable
+        color: AppTheme.bgCard,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.accentBorder.withOpacity(0.5)),
       ),
@@ -104,7 +104,6 @@ class _SettingGroup extends StatelessWidget {
 
 class _HeaderSection extends StatelessWidget {
   const _HeaderSection();
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -120,7 +119,7 @@ class _HeaderSection extends StatelessWidget {
           ),
         ),
         const Text(
-          'Configure your experience',
+          'Manage SpeedCharge performance',
           style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
         ),
       ],
@@ -130,7 +129,6 @@ class _HeaderSection extends StatelessWidget {
 
 class _DeviceCard extends StatelessWidget {
   const _DeviceCard();
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -149,11 +147,8 @@ class _DeviceCard extends StatelessWidget {
               color: const Color(0xFF0a1a12),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
-              Icons.phone_iphone_rounded,
-              color: AppTheme.accentLight,
-              size: 26,
-            ),
+            child: const Icon(Icons.bolt_rounded,
+                color: AppTheme.accentLight, size: 26),
           ),
           const SizedBox(width: 14),
           Column(
@@ -168,33 +163,12 @@ class _DeviceCard extends StatelessWidget {
                 ),
               ),
               const Text(
-                'iOS 18.3 · 3847 mAh',
+                'Health: 98% · 3847 mAh',
                 style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
               ),
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  final String text;
-  const _SectionHeader(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8, left: 4),
-      child: Text(
-        text.toUpperCase(),
-        style: const TextStyle(
-          fontSize: 11,
-          color: AppTheme.textMuted,
-          letterSpacing: 1.0,
-          fontWeight: FontWeight.w600,
-        ),
       ),
     );
   }
@@ -206,12 +180,11 @@ class _ToggleRow extends StatelessWidget {
   final ValueNotifier<bool> notifier;
   final bool isLast;
 
-  const _ToggleRow({
-    required this.label,
-    required this.subtitle,
-    required this.notifier,
-    this.isLast = false,
-  });
+  const _ToggleRow(
+      {required this.label,
+      required this.subtitle,
+      required this.notifier,
+      this.isLast = false});
 
   @override
   Widget build(BuildContext context) {
@@ -232,16 +205,12 @@ class _ToggleRow extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        label,
-                        style: const TextStyle(
-                            fontSize: 14, color: AppTheme.textPrimary),
-                      ),
-                      Text(
-                        subtitle,
-                        style: const TextStyle(
-                            fontSize: 11, color: AppTheme.textMuted),
-                      ),
+                      Text(label,
+                          style: const TextStyle(
+                              fontSize: 14, color: AppTheme.textPrimary)),
+                      Text(subtitle,
+                          style: const TextStyle(
+                              fontSize: 11, color: AppTheme.textMuted)),
                     ],
                   ),
                 ),
@@ -264,11 +233,10 @@ class _ToggleRow extends StatelessWidget {
         ),
         if (!isLast)
           Divider(
-            height: 1,
-            indent: 16,
-            endIndent: 16,
-            color: AppTheme.accentBorder.withOpacity(0.3),
-          ),
+              height: 1,
+              indent: 16,
+              endIndent: 16,
+              color: AppTheme.accentBorder.withOpacity(0.3)),
       ],
     );
   }
@@ -290,26 +258,41 @@ class _InfoTile extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                label,
-                style: const TextStyle(
-                    fontSize: 14, color: AppTheme.textSecondary),
-              ),
-              Text(
-                value,
-                style: const TextStyle(fontSize: 14, color: AppTheme.textMuted),
-              ),
+              Text(label,
+                  style: const TextStyle(
+                      fontSize: 14, color: AppTheme.textSecondary)),
+              Text(value,
+                  style:
+                      const TextStyle(fontSize: 14, color: AppTheme.textMuted)),
             ],
           ),
         ),
         if (!isLast)
           Divider(
-            height: 1,
-            indent: 16,
-            endIndent: 16,
-            color: AppTheme.accentBorder.withOpacity(0.3),
-          ),
+              height: 1,
+              indent: 16,
+              endIndent: 16,
+              color: AppTheme.accentBorder.withOpacity(0.3)),
       ],
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  final String text;
+  const _SectionHeader(this.text);
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8, left: 4),
+      child: Text(
+        text.toUpperCase(),
+        style: const TextStyle(
+            fontSize: 11,
+            color: AppTheme.textMuted,
+            letterSpacing: 1.0,
+            fontWeight: FontWeight.w600),
+      ),
     );
   }
 }
