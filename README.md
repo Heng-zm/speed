@@ -100,4 +100,3 @@ For real hardware data, pair with a USB power meter and BLE integration.
 ## 📝 License
 
 MIT — free to use and modify.
-# speed

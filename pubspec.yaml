@@ -1,7 +1,7 @@
 name: speedcharge
 description: SpeedCharge - Advanced Battery Monitor App
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.1.0+1
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -9,7 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  battery_plus: ^6.0.1
+  battery_plus: ^6.1.0
   percent_indicator: ^4.2.3
   fl_chart: ^0.68.0
   shared_preferences: ^2.2.3
@@ -18,11 +18,19 @@ dependencies:
   cupertino_icons: ^1.0.6
   animated_text_kit: ^4.2.2
   provider: ^6.1.2
+  # Added for the build_runner/Hive workflow:
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  device_info_plus: ^11.1.0
+  package_info_plus: ^8.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  # REQUIRED: This fixes the "Could not find package build_runner" error
+  build_runner: ^2.4.13
+  hive_generator: ^2.0.1
 
 flutter:
   uses-material-design: true
